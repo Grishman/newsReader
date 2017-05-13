@@ -1,9 +1,8 @@
 package com.reader.grishman.newsreader;
 
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,15 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.reader.grishman.newsreader.data.NewsApi;
-import com.reader.grishman.newsreader.data.RetrofitController;
-import com.reader.grishman.newsreader.model.Article;
-import com.reader.grishman.newsreader.model.ArticlesResponse;
-import com.reader.grishman.newsreader.model.BaseApiCallback;
-import com.reader.grishman.newsreader.model.BaseResponse;
-
-import java.util.List;
-import java.util.concurrent.Executors;
+import com.reader.grishman.newsreader.services.ArticlesFetcher;
+import com.reader.grishman.newsreader.utils.Constants;
 
 public class MainScreenActivity extends AppCompatActivity {
 
@@ -73,9 +65,13 @@ public class MainScreenActivity extends AppCompatActivity {
                 switch (tab.getPosition()) {
                     case 0:
 //                        return PlaceholderFragment.newInstance(tab.getPosition() + 1);
+                        fetchNews("bbc-news", "top");
                         break;
                     case 1:
-
+                        fetchNews("bbc-sport", "top");
+                        break;
+                    case 2:
+                        fetchNews("ars-technica", "top");
                         break;
                 }
 
@@ -91,6 +87,13 @@ public class MainScreenActivity extends AppCompatActivity {
             }
         });
         //tabLayout.setupWithViewPager(mViewPager);
+    }
+
+    private void fetchNews(String source, String sortBy) {
+        Intent serviceIntent = new Intent(getApplicationContext(), ArticlesFetcher.class);
+        serviceIntent.putExtra(Constants.QUERY_SOURCE, source);
+        serviceIntent.putExtra(Constants.QUERY_SORT_BY, sortBy);
+        startService(serviceIntent);
     }
 
 
@@ -113,28 +116,6 @@ public class MainScreenActivity extends AppCompatActivity {
                 return true;
             }
             case R.id.action_favorites: {
-                //todo replace this shit
-                final retrofit2.Call<ArticlesResponse> call = RetrofitController.getInstance().createService(NewsApi.class).getNews("bbc-news", "top");
-                Executors.newSingleThreadExecutor().submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        call.enqueue(new BaseApiCallback<ArticlesResponse>() {
-                            @Override
-                            public void onSuccess(@NonNull ArticlesResponse body) {
-                                List<Article> list = body.getArticles();
-                                if (list != null) {
-                                    list.size();
-                                }
-                            }
-
-                            @Override
-                            public void onFailed(@Nullable BaseResponse.Error error, @Nullable Throwable t) {
-                                //error.getMeassage();
-                            }
-                        });
-                    }
-                });
-
                 return true;
             }
             default:
