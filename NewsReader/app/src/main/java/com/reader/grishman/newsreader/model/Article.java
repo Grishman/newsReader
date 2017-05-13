@@ -26,4 +26,20 @@ public class Article {
     private String urlToImage;
     @JsonProperty("publishedAt")
     private String publishedAt;
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }

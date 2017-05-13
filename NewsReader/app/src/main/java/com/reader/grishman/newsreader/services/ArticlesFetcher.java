@@ -7,10 +7,13 @@ import android.support.annotation.Nullable;
 
 import com.reader.grishman.newsreader.data.NewsApi;
 import com.reader.grishman.newsreader.data.RetrofitController;
+import com.reader.grishman.newsreader.data.events.ArticlesEvent;
 import com.reader.grishman.newsreader.model.ArticlesResponse;
 import com.reader.grishman.newsreader.model.BaseApiCallback;
 import com.reader.grishman.newsreader.model.BaseResponse;
 import com.reader.grishman.newsreader.utils.Constants;
+
+import org.greenrobot.eventbus.EventBus;
 
 import retrofit2.Call;
 
@@ -42,6 +45,7 @@ public class ArticlesFetcher extends IntentService {
             @Override
             public void onSuccess(@NonNull ArticlesResponse body) {
                 //todo notify UI and save to DB
+                EventBus.getDefault().postSticky(new ArticlesEvent(body.getArticles()));
             }
 
             @Override
