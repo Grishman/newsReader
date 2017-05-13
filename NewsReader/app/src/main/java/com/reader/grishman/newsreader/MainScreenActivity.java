@@ -2,6 +2,8 @@ package com.reader.grishman.newsreader;
 
 import android.content.res.TypedArray;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,13 +20,13 @@ import android.widget.TextView;
 
 import com.reader.grishman.newsreader.data.NewsApi;
 import com.reader.grishman.newsreader.data.RetrofitController;
+import com.reader.grishman.newsreader.model.Article;
+import com.reader.grishman.newsreader.model.ArticlesResponse;
+import com.reader.grishman.newsreader.model.BaseApiCallback;
+import com.reader.grishman.newsreader.model.BaseResponse;
 
+import java.util.List;
 import java.util.concurrent.Executors;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MainScreenActivity extends AppCompatActivity {
 
@@ -106,34 +108,38 @@ public class MainScreenActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_filter) {
-            return true;
+        switch (id) {
+            case R.id.action_filter: {
+                return true;
+            }
+            case R.id.action_favorites: {
+                //todo replace this shit
+                final retrofit2.Call<ArticlesResponse> call = RetrofitController.getInstance().createService(NewsApi.class).getNews("bbc-news", "top");
+                Executors.newSingleThreadExecutor().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        call.enqueue(new BaseApiCallback<ArticlesResponse>() {
+                            @Override
+                            public void onSuccess(@NonNull ArticlesResponse body) {
+                                List<Article> list = body.getArticles();
+                                if (list != null) {
+                                    list.size();
+                                }
+                            }
+
+                            @Override
+                            public void onFailed(@Nullable BaseResponse.Error error, @Nullable Throwable t) {
+                                //error.getMeassage();
+                            }
+                        });
+                    }
+                });
+
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        if (id == R.id.action_favorites) {
-            final retrofit2.Call<ResponseBody> call = RetrofitController.getInstance().createService(NewsApi.class).getNews();
-            Executors.newSingleThreadExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    call.enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                        }
-                    });
-                }
-            });
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     /**
